@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<div class="col-xs-12">
+    <a href="#/addItem" style="margin-bottom: 10px;" class="btn btn-primary btn-lg btn-block">
+        <span class="glyphicon glyphicon-plus"></span>
+        Add grocery item
+    </a>
+    <ul class="list-group">
+         <li ng-repeat="item in groceryItems | orderBy: 'date'" class="list-group-item text-center clearfix">
+             <span style="font-weight: bold">{{item.itemName | uppercase}}</span>
+             <span style="font-weight: bold">{{item.id}}</span>
+         </li>
+    </ul>
+</div>
