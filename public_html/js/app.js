@@ -10,15 +10,15 @@ app.config(function($routeProvider){
     $routeProvider
             .when("/", {
                 templateUrl: "views/groceryList.html",
-                controller: "GroceryListItemsController"
+                controller: "HomeController"
             })
             .when("/addItem", {
                 templateUrl: "views/addItem.html",
-                controller: "GroceryListItemsController"
+                controller: "GroceryListItemController"
             })
-            .when("/addItem/:id", {
-                templateUrl: "views/addItem.html",
-                controller: "GroceryListItemsController"
+            .when("/addItem/edit/:id", {
+                templateUrl : "views/addItem.html",
+                controller: "GroceryListItemController"
             })
             .otherwise({
                 redirectTo: "/"
@@ -36,6 +36,16 @@ app.service("GroceryService", function(){
         ];
        
     
+    groceryService.findById = function(id){
+        for(var item in groceryService.groceryItems){
+            if(groceryService.groceryItems[item].id === id){
+                return groceryService.groceryItems[item];
+            }
+        }
+    }
+    
+    
+    
     groceryService.getNewId = function(){
         if(groceryService.newId){
             groceryService.newId++;
@@ -50,31 +60,42 @@ app.service("GroceryService", function(){
     
         
     groceryService.save = function(entry){
-        entry.id = groceryService.getNewId();
-        groceryService.groceryItems.push(entry);
+        
+        var updatedItem = groceryService.findById(entry.id);
+        
+        if(updatedItem){
+             updatedItem.completed = entry.completed;
+             updatedItem.itemName = entry.itemName;
+             updatedItem.date = entry.date;
+        }else{
+            entry.id = groceryService.getNewId();
+            groceryService.groceryItems.push(entry);
+        }
+        
+       
     }
     
    
     return groceryService;
 })
 
-app.controller("HomeController", ["$scope", function($scope){
-    $scope.appTitle = "Grocery List";
+app.controller("HomeController", ["$scope", "GroceryService",function($scope, GroceryService){
+    $scope.groceryItems = GroceryService.groceryItems;
 }]);
 
-app.controller("GroceryListItemsController", ["$scope", "$routeParams", "GroceryService", "$location",function($scope, $routeParams, GroceryService, $location){
-        $scope.groceryItems = GroceryService.groceryItems;
-        
-        $scope.rp = "Route Parameter value: " + $routeParams.id;
-        
-        $scope.groceryItem = { id: 5, completed: true, itemName: 'cheese', date: new Date() };
+app.controller("GroceryListItemController", ["$scope", "$routeParams", "GroceryService", "$location",function($scope, $routeParams, GroceryService, $location){
+
+        if(!$routeParams.id){
+            $scope.groceryItem = { id: 0, completed: false, itemName: '', date: new Date() };
+        }else{
+            $scope.groceryItem = _.clone(GroceryService.findById(parseInt($routeParams.id)));
+        }
         
         $scope.save = function(){
             GroceryService.save ($scope.groceryItem);
             $location.path('/');
         }
-        
-        console.log($scope.groceryItems);
+
 }]);
 
 
